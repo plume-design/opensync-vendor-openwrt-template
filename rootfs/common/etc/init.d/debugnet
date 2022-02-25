@@ -1,0 +1,50 @@
+#!/bin/sh /etc/rc.common
+# {# jinja-parse #}
+INSTALL_PREFIX={{INSTALL_PREFIX}}
+
+START=50
+
+SERVICE_PID_FILE="/var/run/udhcpc.pid"
+
+NAME=debugnet
+
+INTERFACES="eth1"
+VLAN=4
+VLAN_DEFAULT_NAME="vlan${VLAN}"
+
+start()
+{
+    for IF in $INTERFACES
+    do
+        # Skip non-existing interfaces
+        [ ! -e /sys/class/net/$IF ] && continue
+
+        VIF="${IF}.${VLAN}"
+        [ -d "/sys/class/net/$VIF" ] || vconfig add $IF $VLAN
+
+        # Bring-up interfaces
+        ifconfig $IF up
+        ifconfig $VIF up
+        start-stop-daemon -S -x /sbin/udhcpc -p $SERVICE_PID_FILE -b -m -- -s ${INSTALL_PREFIX}/bin/udhcpc.sh -f -S -i $VIF -C -o -O subnet
+
+        # If interface comes up with the default name "vlanx" then rename it to ethx.4
+        if [ ! -d "/sys/class/net/$VIF" ] && [ -d "/sys/class/net/$VLAN_DEFAULT_NAME" ]; then
+            ip link set dev $VLAN_DEFAULT_NAME down
+            ip link set dev $VLAN_DEFAULT_NAME name $VIF
+            ip link set dev $VIF up
+        fi
+    done
+}
+
+stop()
+{
+    for IF in $INTERFACES
+    do
+        # Skip non-existing interfaces
+        [ ! -e /sys/class/net/$IF ] && continue
+
+        VIF="${IF}.${VLAN}"
+        start-stop-daemon -K -x /sbin/udhcpc -p $SERVICE_PID_FILE
+        [ -d "/sys/class/net/$VIF" ] && vconfig rem $VIF
+    done
+}

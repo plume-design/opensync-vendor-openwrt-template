@@ -1,0 +1,11 @@
+OS_TARGETS += LINKSYS_MR8300
+
+TARGET ?= $(DEFAULT_TARGET)
+
+ifneq ($(filter $(OS_TARGETS),$(TARGET)),)
+PLATFORM := cfg80211
+VENDOR := openwrt-template
+SERVICE_PROVIDERS ?= local ALL
+KCONFIG_TARGET ?= $(VENDOR_DIR)/kconfig/targets/$(TARGET)
+ARCH_MK = $(PLATFORM_DIR)/build/$(PLATFORM).mk
+endif
