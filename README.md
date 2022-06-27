@@ -13,9 +13,9 @@ Linksys MR8300 hardware.
 
     | Component                          | Version     |
     |------------------------------------|-------------|
-    | OpenSync core                      | 2.0.5       |
-    | OpenSync vendor/openwrt-template   | 2.0.5       |
-    | OpenSync platform/cfg80211         | 2.0.5       |
+    | OpenSync core                      | 3.2.x       |
+    | OpenSync vendor/openwrt-template   | 3.2.x       |
+    | OpenSync platform/cfg80211         | 3.2.x       |
     | OpenWrt SDK                        | 19.07.6     |
 
 
@@ -53,7 +53,7 @@ Prerequisites
 * A Linux system with Docker
 
 For building the firmware, it is recommended to use docker.
-For additional information, refer to [opensync-sdk-openwrt/README.md](https://github.com/plume-design/opensync-sdk-openwrt/tree/osync_2.0.5#readme).
+`Dockerfile` and a `dock-run` script are provided in the SDK overlay.
 
 #### Environment variables
 
@@ -89,10 +89,10 @@ modularity. Key components are:
 Follow these steps to populate the `${OPENSYNC_ROOT}` directory:
 
 ```
-$ git clone --branch osync_2.0.5 https://github.com/plume-design/opensync.git ${OPENSYNC_ROOT}/core
-$ git clone --branch osync_2.0.5 https://github.com/plume-design/opensync-platform-cfg80211.git ${OPENSYNC_ROOT}/platform/cfg80211
-$ git clone --branch osync_2.0.5 https://github.com/plume-design/opensync-vendor-openwrt-template.git ${OPENSYNC_ROOT}/vendor/openwrt-template
-$ git clone --branch osync_2.0.5 https://github.com/plume-design/opensync-service-provider-local.git ${OPENSYNC_ROOT}/service-provider/local
+$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync.git ${OPENSYNC_ROOT}/core
+$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync-platform-cfg80211.git ${OPENSYNC_ROOT}/platform/cfg80211
+$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync-vendor-openwrt-template.git ${OPENSYNC_ROOT}/vendor/openwrt-template
+$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync-service-provider-local.git ${OPENSYNC_ROOT}/service-provider/local
 $ mkdir ${OPENSYNC_ROOT}/3rdparty
 ```
 
@@ -133,7 +133,7 @@ To obtain the OpenWrt SDK and the corresponding OpenSync overlay,
 follow the steps below:
 
 ```
-$ git clone --branch osync_2.0.5 https://github.com/plume-design/opensync-sdk-openwrt.git ${OPENWRT_SDK_ROOT}
+$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync-sdk-openwrt.git ${OPENWRT_SDK_ROOT}
 $ cd ${OPENWRT_SDK_ROOT}
 $ ./docker/dock-run make CONFIG=mr8300 prepare V=s
 ```

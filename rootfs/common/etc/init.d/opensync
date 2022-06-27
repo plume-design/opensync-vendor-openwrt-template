@@ -32,7 +32,7 @@ stop_service()
     echo "Removing certificates"
     rm -rf ${CERTS_DEST_PATH}
     echo "Killing managers"
-    killall -9 dm cm nm wm lm sm bm um om qm fsm fcm
+    killall -9 dm cm nm wm lm sm bm um om qm fsm fcm psm wano pm
     killall -9 udhcpc dnsmasq
     echo "Removing existing DHCP leases"
     rm /tmp/dhcp.leases

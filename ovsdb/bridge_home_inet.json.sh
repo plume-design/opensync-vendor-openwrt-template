@@ -16,6 +16,15 @@ $(test -n "$(eval echo $CONFIG_TARGET_LAN_BRIDGE_NAME)" && \
             "network": true
         }
     },
+    {
+        "op":"update",
+        "table":"Wifi_Inet_Config",
+        "where":[["if_name","==","eth0"]],
+        "row": {
+            "if_name": "eth0",
+            "mac_reporting": true
+        }
+    },
 INET
 )
     { "op": "comment", "comment": "" }
