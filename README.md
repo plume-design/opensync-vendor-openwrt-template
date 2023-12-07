@@ -3,9 +3,11 @@ OpenSync OpenWrt Template
 
 Reference/template vendor layer implementation for OpenWrt-based targets.
 
-This vendor layer template provides an example target implementation for the
-Linksys MR8300 hardware.
+This vendor layer provides an example target implementations for the following
+reference boards:
 
+* FILOGIC830-AX6000 - gateway and extender mode (MTK WiFi 6 reference board)
+* FILOGIC830-AX8400 - gateway and extender mode (MTK WiFi 6E reference board)
 
 #### Reference software versions
 
@@ -13,17 +15,17 @@ Linksys MR8300 hardware.
 
     | Component                          | Version     |
     |------------------------------------|-------------|
-    | OpenSync core                      | 3.2.x       |
-    | OpenSync vendor/openwrt-template   | 3.2.x       |
-    | OpenSync platform/cfg80211         | 3.2.x       |
-    | OpenWrt SDK                        | 19.07.6     |
+    | OpenSync core                      | 5.6.x       |
+    | OpenSync vendor/openwrt-template   | 5.6.x       |
+    | OpenSync platform/cfg80211         | 5.6.x       |
+    | OpenWrt SDK                        | 21.02       |
 
 
 #### Reference device information
 
-* Brand/Model: Linksys MR8300
-* Chipset: IPQ4019
-* WLAN Hardware: Qualcomm Atheros IPQ4019, QCA9886
+* Brand/Model: FILOGIC830-AX6000
+* Chipset: MT7986 (Platform SoC)
+* WLAN Hardware: MediaTek MT7986 (AP SoC for 2.4G/5G)
 
 * Interfaces:
 
@@ -31,48 +33,32 @@ Linksys MR8300 hardware.
     |---------------|---------------------------------------------------|
     | eth0          | LAN ethernet interface                            |
     | eth1          | WAN ethernet interface                            |
-    | br-lan        | LAN bridge                                        |
-    | phy0          | 5G upper wireless phy interace                    |
+    | br-home       | LAN bridge                                        |
+    | phy0          | 2.4G wireless phy interace                        |
+    | phy1          | 5G wireless phy interace                          |
+    | bhaul-ap-XX   | 2.4G/5G backhaul VAPs                             |
+    | home-ap-XX    | 2.4G/5G home VAPs                                 |
+    | onboard-ap-XX | 2.4G/5G onboard VAPs                              |
+    | bhaul-sta-XX  | 2.4G/5G station interfaces (extender only)        |
+
+* Brand/Model: FILOGIC830-AX8400
+* Chipset: MT7986 (Platform SoC)
+* WLAN Hardware: MediaTek MT7986 (AP SoC for 2.4G/6G) + MT7915 (PCIE for 5G)
+
+* Interfaces:
+
+    | Interface     | Description                                       |
+    |---------------|---------------------------------------------------|
+    | eth0          | LAN ethernet interface                            |
+    | eth1          | WAN ethernet interface                            |
+    | br-home       | LAN bridge                                        |
+    | phy0          | 5G wireless phy interace                          |
     | phy1          | 2.4G wireless phy interace                        |
-    | phy2          | 5G lower wireless phy interace                    |
-    | bhaul-ap-XX   | 2.4G and 5G backhaul VAPs                         |
-    | home-ap-XX    | 2.4G and 5G home VAPs                             |
-    | onboard-ap-XX | 2.4G and 5G onboard VAPs                          |
-    | bhaul-sta-XX  | 2.4G and 5G station interfaces (extender only)    |
-
-For more information check [Linksys MR8300](https://openwrt.org/toh/linksys/mr8300)
-in [OpenWrt Table of Hardware](https://openwrt.org/toh/start).
-A very similar [Linksys EA8300](https://openwrt.org/toh/linksys/ea8300) can also be used.
-
-
-Prerequisites
--------------
-
-#### Build system requirements
-
-* A Linux system with Docker
-
-For building the firmware, it is recommended to use docker.
-`Dockerfile` and a `dock-run` script are provided in the SDK overlay.
-
-#### Environment variables
-
-Downloaded source files will reside in two locations, separately for:
-* OpenSync source code
-* OpenWrt source code and packages
-
-To simplify build commands, it is recommended to create the following
-environment variables (assuming location of sources is `~/projects`):
-
-```
-export OPENSYNC_ROOT=~/projects/opensync
-export OPENWRT_SDK_ROOT=~/projects/sdk/openwrt
-```
-
-Typically, the above two lines are added to `~/.bashrc` or an equivalent file.
-
-The rest of the document assumes that these two variables are defined, therefore
-these two locations are referred to as `${OPENSYNC_ROOT}` and `${OPENWRT_SDK_ROOT}`.
+    | phy2          | 6G wireless phy interace                          |
+    | bhaul-ap-XX   | 2.4G/5G/6G backhaul VAPs                          |
+    | home-ap-XX    | 2.4G/5G/6G home VAPs                              |
+    | onboard-ap-XX | 2.4G/5G/6G onboard VAPs                           |
+    | bhaul-sta-XX  | 2.4G/5G/6G station interfaces (extender only)     |
 
 
 OpenSync root dir
@@ -89,10 +75,10 @@ modularity. Key components are:
 Follow these steps to populate the `${OPENSYNC_ROOT}` directory:
 
 ```
-$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync.git ${OPENSYNC_ROOT}/core
-$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync-platform-cfg80211.git ${OPENSYNC_ROOT}/platform/cfg80211
-$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync-vendor-openwrt-template.git ${OPENSYNC_ROOT}/vendor/openwrt-template
-$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync-service-provider-local.git ${OPENSYNC_ROOT}/service-provider/local
+$ git clone --branch osync_5.6.0 https://github.com/plume-design/opensync.git ${OPENSYNC_ROOT}/core
+$ git clone --branch osync_5.6.0 https://github.com/plume-design/opensync-platform-cfg80211.git ${OPENSYNC_ROOT}/platform/cfg80211
+$ git clone --branch osync_5.6.0 https://github.com/plume-design/opensync-vendor-openwrt-template.git ${OPENSYNC_ROOT}/vendor/openwrt-template
+$ git clone --branch osync_5.6.0 https://github.com/plume-design/opensync-service-provider-local.git ${OPENSYNC_ROOT}/service-provider/local
 $ mkdir ${OPENSYNC_ROOT}/3rdparty
 ```
 
@@ -126,120 +112,152 @@ ${OPENSYNC_ROOT}
 ```
 
 
-OpenWrt SDK
------------
+Setting up OpenWrt
+------------------
 
-To obtain the OpenWrt SDK and the corresponding OpenSync overlay,
-follow the steps below:
+To integrate the OpenSync package into OpenWrt, follow the steps below:
 
+1. Get OpenWrt 21.02 source code from Git server
 ```
-$ git clone --branch osync_3.2.7 https://github.com/plume-design/opensync-sdk-openwrt.git ${OPENWRT_SDK_ROOT}
-$ cd ${OPENWRT_SDK_ROOT}
-$ ./docker/dock-run make CONFIG=mr8300 prepare V=s
-```
-
-The layout after the first step (cloning), should be as follows:
-
-```
-${OPENWRT_SDK_ROOT}
-├── config
-│   ├── mr8300.mk
-│   └── undefined.mk
-├── contrib
-│   ├── config
-│   │   └── public-opensync
-│   │       └── ...
-│   ├── files
-│   │   └── public-opensync
-│   │       └── ...
-│   └── patches
-│       └── public-opensync
-│           └── ...
-├── docker
-│   ├── Dockerfile
-│   └── dock-run
-├── Makefile
-├── Makefile.mr8300.mk
-├── ...
+git clone --branch openwrt-21.02 https://git.openwrt.org/openwrt/openwrt.git
+cd openwrt; git checkout b119562a0753c282f3cdab0912810bdbe71a0f68; cd -;
 ```
 
-`contrib` directory contains the OpenSync-specific overlay.  
-`config` contains the make parameters for the supported configuration(s).
-
-The second step (running `make CONFIG=mr8300 prepare`), should add
-`.cache.mr8300` and `build-mr8300` directories:
-
+2. Get OpenWrt master source code from Git server
 ```
-${OPENWRT_SDK_ROOT}
-├── .cache.mr8300
-│   └── openwrt
-│          └── ...
-├── build-mr8300
-│   └── openwrt
-│          └── ...
-├── config
-│   └── ...
-├── contrib
-│   └── ...
-├── ...
-```  
+git clone --branch master https://git.openwrt.org/openwrt/openwrt.git mac80211_package
+cd mac80211_package; git checkout 5c7e4a9d2e25d5ecc33c3c2650e4f954936c9c69; cd -;
+```
 
-`.cache.mr8300` consists of cloned OpenWrt repositories with feeds installed.  
-`build-mr8300/openwrt` is the working directory with both `contrib` overlay and `mr8300.config` applied.
+3. Get mtk-openwrt-feeds source code
+```
+git clone --branch master https://git01.mediatek.com/openwrt/feeds/mtk-openwrt-feeds
+cd mtk-openwrt-feeds; git checkout aa392b3498c8579b07afeed4477a6a1b2f042a44; cd -;
+```
 
-At this point the `build-mr8300/openwrt` directory status corresponds to a standard OpenWrt build
-with feeds installed and menuconfig done.
+4. Change to the `openwrt` folder
+```
+cp -rf mtk-openwrt-feeds/autobuild_mac80211_release openwrt
+cd openwrt; mv autobuild_mac80211_release autobuild
+```
 
-Note that `${OPENSYNC_ROOT}` has not been specified anywhere, so up to this point
-OpenSync sources were not included.
+5. Add MTK feed
+```
+echo "src-git mtk_openwrt_feed https://git01.mediatek.com/openwrt/feeds/mtk-openwrt-feeds" >> feeds.conf.default
+```
+
+6. Edit `autobuild/feeds.conf.default-21.02`
+```
+src-git packages https://git.openwrt.org/feed/packages.git^f01f54e
+src-git luci https://git.openwrt.org/project/luci.git^d30ab74
+src-git routing https://git.openwrt.org/feed/routing.git^2c21c16
+src-git mtk_openwrt_feed https://git01.mediatek.com/openwrt/feeds/mtk-openwrt-feeds^aa392b3 
+```
+
+7. Copy OpenSync related overlays (package, dependencies, patches) to the `openwrt` directory
+
+8. Append OpenWrt `.config` for OpenSync 
+```
+echo "CONFIG_PACKAGE_opensync=y" >> openwrt.config
+echo "CONFIG_OPENSYNC_TARGET=FILOGIC830-AX6000/FILOGIC830-AX8400" >> openwrt.config
+```
 
 
 Build
 -----
 
-The following command builds the firmware:
-
+1. Run AX6000/AX8400 auto build script (APSoC: MT7986A/B, PCIE: MT7915A/D, MT7916)
 ```
-$ ./docker/dock-run make CONFIG=mr8300 OPENSYNC_SRC=${OPENSYNC_ROOT} compile V=s
+./autobuild/mt7986_mac80211/lede-branch-build-sanity.sh
 ```
 
-To get your image in `${OPENWRT_SDK_ROOT}/build-mr8300/images` directory, run:
-
+2. Further builds (after the first full build)
 ```
-$ ./docker/dock-run make CONFIG=mr8300 OPENSYNC_SRC=${OPENSYNC_ROOT} image V=s
+./scripts/feeds update –a
+make V=s
 ```
 
 
 Image install
 -------------
 
+Get your image in `openwrt/bin/targets/mediatek/mt7986` directory
+
+* FILOGIC-AX6000 with 2.5G WAN:
+
+`openwrt-mediatek-mt7986-mt7986b-ax6000-2500wan-spim-nand-rfb-squashfs-sysupgrade`
+
+* FILOGIC-AX6000 without 2.5G WAN:
+
+`openwrt-mediatek-mt7986-mt7986b-ax6000-spim-nand-rfb-squashfs-sysupgrade`
+
+* FILOGIC-AX8400 with 2.5G WAN:
+
+`openwrt-mediatek-mt7986-mt7986a-ax6000-2500wan-spim-nand-rfb-squashfs-sysupgrade.bin`
+
+* FILOGIC-AX8400 without 2.5G WAN:
+
+`openwrt-mediatek-mt7986-mt7986a-ax6000-spim-nand-rfb-squashfs-sysupgrade.bin`
+
+#### Full image reflash
+
+Copy the `xxx.bin` file to the TFTP server boot directory.
+Power on the device and follow the steps below to flash image in U-Boot:
+
+1. Select `2. Upgrade firmware`
+```
+  *** U-Boot Boot Menu ***
+      1. Startup system (Default)
+      2. Upgrade firmware
+      3. Upgrade ATF BL2
+      4. Upgrade ATF FIP
+      5. Upgrade single image
+      6. Load image
+      7. Start Web failsafe
+      0. U-Boot console
+```
+
+2. Select `Y`
+```
+Run image after upgrading? (Y/n):
+```
+
+3. Select `0 - TFTP client (Default)`
+```
+Available load methods:
+    0 - TFTP client (Default)
+    1 - Xmodem
+    2 - Ymodem
+    3 - Kermit
+    4 - S-Record
+```
+
+4. Set the IP address and server IP using the TFTP process:
+```
+Input U-Boot's IP address: 192.168.1.1
+Input TFTP server's IP address: 192.168.1.10
+Input IP netmask: 255.255.255.0
+Input file name: xxx.bin
+```
+
+#### Firmware upgrade
+
 Image install utilizes the standard OpenWrt `sysupgrade`, for example:
 
 ```
-$ cd /tmp
-$ curl -O <image-url>  # image name ending with *-sysupgrade.bin
-$ sysupgrade -n <image-file>
+$ sysupgrade -v <image-file>
 ```
-
-If the starting point is a brand new freshly unpacked device, a `*-factory.bin` image is necessary.
-It needs to be uploaded via http://192.168.1.1:52000/fwupdate.html.
 
 
 Run
 ---
 
-OpenSync will be automatically started at startup -- see `/etc/rc.d/S90opensync`.
+OpenSync will be automatically started at startup -- see `/etc/rc.d/S961opensync`.
 
-To manually stop OpenSync, use the following command:
+To manually start, stop, or restart OpenSync, use the following commands:
 
 ```
-$ /etc/init.d/opensync stop
-```
-
-When restarting, certain other services have to be restarted as well.
-Use the following script to restart OpenSync:
-```
-$ /usr/opensync/bin/restart.sh
+$ /etc/init.d/opensync start|stop|restart
 ```
 
 
@@ -248,9 +266,8 @@ Device access
 
 The preferred way to access the device is through the serial console.
 
-SSH access is also available on all interfaces:
-* Username: `osync`
-* Password: `osync123`
+SSH access is also available on all interfaces without password:
+* Username: `root`
 
 
 OpenSync resources

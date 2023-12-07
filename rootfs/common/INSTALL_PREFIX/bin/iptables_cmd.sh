@@ -46,8 +46,10 @@ iptables_boot()
     log "Enabling eth0.4 unconditionally"
     iptables -w -A INPUT -i eth0.4 -j ACCEPT
 
-    log "Enabling ICMP protocol on all interfaces"
-    iptables -w -A INPUT -p icmp -j ACCEPT
+    log "Enabling ICMP protocol on all interfaces, blocking timestamp request and reply"
+    iptables -A INPUT -p icmp --icmp-type timestamp-request -j DROP
+    iptables -A INPUT -p icmp -j ACCEPT
+    iptables -A OUTPUT -p icmp --icmp-type timestamp-reply -j DROP
 
     log "Adding NM wavering chains"
 

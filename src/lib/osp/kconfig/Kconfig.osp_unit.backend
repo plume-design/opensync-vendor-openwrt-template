@@ -1,0 +1,14 @@
+config OSP_UNIT_OPENWRT_TEMPLATE
+    bool "OPENWRT template Plume hardware example"
+    help
+        Example of OSP unit API implementation used by Plume hardware based
+        targets from OPENWRT-template vendor layer.
+
+if OSP_UNIT_OPENWRT_TEMPLATE
+    config OSP_UNIT_OPENWRT_TEMPLATE_SERIAL_PREFIX
+        string "Unit serial number prefix"
+        default "OSx"
+    config OSP_UNIT_OPENWRT_TEMPLATE_SERIAL_IFNAME
+        string "The interface used for generate unit serial number"
+        default "eth0"
+endif

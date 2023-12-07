@@ -1,0 +1,52 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Usage: `basename $0` <rootfs-path>"
+    exit 1
+fi
+
+ROOTFS=$1
+RCD_TARGET_DIR=${RCD_TARGET_DIR:="rc.d"}
+
+service_get_start()
+{
+    START=$(sed -n '/^#*START=/{s/^.*=//;p;q}' < "${ROOTFS}/etc/init.d/$SERVICE")
+    if [ -z "$START" ]; then
+        echo "*** ERROR service $SERVICE unknown START level"
+        exit 1
+    fi
+}
+
+service_enable()
+{
+    SERVICE="$1"
+    service_get_start
+    echo "*** enable service $SERVICE ($START)"
+    sed -i 's/^#START/START/' "${ROOTFS}/etc/init.d/$SERVICE"
+    ln -sf "../init.d/$SERVICE" "${ROOTFS}/etc/${RCD_TARGET_DIR}/S${START}$SERVICE"
+}
+
+service_disable()
+{
+    SERVICE="$1"
+    if [ ! -e "${ROOTFS}/etc/init.d/$SERVICE" ]; then
+        echo "*** NOTE: disable service $SERVICE: does not exist"
+    else
+        service_get_start
+        echo "*** disable service $SERVICE ($START)"
+        sed -i 's/^START/#START/' "${ROOTFS}/etc/init.d/$SERVICE"
+        rm -f "${ROOTFS}/etc/${RCD_TARGET_DIR}/S${START}$SERVICE"
+    fi
+    if ls "${ROOTFS}/etc/${RCD_TARGET_DIR}/S"*[0-9]"$SERVICE" >/dev/null 2>/dev/null; then
+        # safety check if START doesn't match S*file
+        echo "*** WARNING: removing stale" "${ROOTFS}/etc/${RCD_TARGET_DIR}/S"*[0-9]"$SERVICE"
+        rm -f "${ROOTFS}/etc/${RCD_TARGET_DIR}/S"*[0-9]"$SERVICE"
+    fi
+}
+
+if [ ! -e "${ROOTFS}/etc/${RCD_TARGET_DIR}" ]; then
+    mkdir -p "${ROOTFS}/etc/${RCD_TARGET_DIR}"
+fi
+
+# enable opensync
+service_enable opensync
