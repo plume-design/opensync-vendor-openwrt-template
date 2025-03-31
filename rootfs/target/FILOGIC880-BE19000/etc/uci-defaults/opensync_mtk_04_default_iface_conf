@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Keep ra0/rai0/rax0 hidden and acl whitelist by default. This is current workaround
+# for avoiding users to see default ssids while scanning
+
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b0.dat set HideSSID 1
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b1.dat set HideSSID 1
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b2.dat set HideSSID 1
+
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b0.dat set AccessPolicy0 1
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b1.dat set AccessPolicy0 1
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b2.dat set AccessPolicy0 1
+
+exit 0

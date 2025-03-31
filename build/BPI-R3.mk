@@ -1,0 +1,1 @@
+include $(VENDOR_DIR)/build/FILOGIC830-AX6000.mk

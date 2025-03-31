@@ -3,11 +3,12 @@ OpenSync OpenWrt Template
 
 Reference/template vendor layer implementation for OpenWrt-based targets.
 
-This vendor layer provides an example target implementations for the following
+This vendor layer provides example target implementations for the following
 reference boards:
 
 * FILOGIC830-AX6000 - gateway and extender mode (MTK WiFi 6 reference board)
 * FILOGIC830-AX8400 - gateway and extender mode (MTK WiFi 6E reference board)
+* FILOGIC880-BE19000 - gateway and extender mode (MTK WiFi 7 reference board)
 
 #### Reference software versions
 
@@ -15,9 +16,9 @@ reference boards:
 
     | Component                          | Version     |
     |------------------------------------|-------------|
-    | OpenSync core                      | 5.6.x       |
-    | OpenSync vendor/openwrt-template   | 5.6.x       |
-    | OpenSync platform/cfg80211         | 5.6.x       |
+    | OpenSync core                      | 6.4.x       |
+    | OpenSync vendor/openwrt-template   | 6.4.x       |
+    | OpenSync platform/cfg80211         | 6.4.x       |
     | OpenWrt SDK                        | 21.02       |
 
 
@@ -34,8 +35,8 @@ reference boards:
     | eth0          | LAN ethernet interface                            |
     | eth1          | WAN ethernet interface                            |
     | br-home       | LAN bridge                                        |
-    | phy0          | 2.4G wireless phy interace                        |
-    | phy1          | 5G wireless phy interace                          |
+    | phy0          | 2.4G wireless phy interface                       |
+    | phy1          | 5G wireless phy interface                         |
     | bhaul-ap-XX   | 2.4G/5G backhaul VAPs                             |
     | home-ap-XX    | 2.4G/5G home VAPs                                 |
     | onboard-ap-XX | 2.4G/5G onboard VAPs                              |
@@ -52,13 +53,36 @@ reference boards:
     | eth0          | LAN ethernet interface                            |
     | eth1          | WAN ethernet interface                            |
     | br-home       | LAN bridge                                        |
-    | phy0          | 5G wireless phy interace                          |
-    | phy1          | 2.4G wireless phy interace                        |
-    | phy2          | 6G wireless phy interace                          |
+    | phy0          | 5G wireless phy interface                         |
+    | phy1          | 2.4G wireless phy interface                       |
+    | phy2          | 6G wireless phy interface                         |
     | bhaul-ap-XX   | 2.4G/5G/6G backhaul VAPs                          |
     | home-ap-XX    | 2.4G/5G/6G home VAPs                              |
     | onboard-ap-XX | 2.4G/5G/6G onboard VAPs                           |
     | bhaul-sta-XX  | 2.4G/5G/6G station interfaces (extender only)     |
+
+* Brand/Model: FILOGIC880-BE19000
+* Chipset: MT7988 (Platform SoC)
+* WLAN Hardware: MediaTek MT7996 Eagle (AP SoC for 2.4G/5G/6G)
+
+* Interfaces:
+
+    | Interface     | Description                                       |
+    |---------------|---------------------------------------------------|
+    | eth0          | LAN ethernet interface                            |
+    | eth1          | WAN ethernet interface                            |
+    | lan0          | LAN ethernet interface                            |
+    | lan1          | LAN ethernet interface                            |
+    | lan2          | LAN ethernet interface                            |
+    | lan3          | LAN ethernet interface                            |
+    | br-home       | LAN bridge                                        |
+    | phy0          | 2.4G wireless phy interface                       |
+    | phy1          | 5G wireless phy interface                         |
+    | phy2          | 6G wireless phy interface                         |
+    | ra1/rai1/rax1 | 2.4G/5G/6G backhaul VAPs                          |
+    | ra3/rai3/rax3 | 2.4G/5G/6G home VAPs                              |
+    | ra2/rai2/rax2 | 2.4G/5G/6G onboard VAPs                           |
+    | apcli0/apclii0/apclix0  | 2.4G/5G/6G station interfaces (extender only)     |
 
 
 OpenSync root dir
@@ -75,10 +99,10 @@ modularity. Key components are:
 Follow these steps to populate the `${OPENSYNC_ROOT}` directory:
 
 ```
-$ git clone --branch osync_5.6.0 https://github.com/plume-design/opensync.git ${OPENSYNC_ROOT}/core
-$ git clone --branch osync_5.6.0 https://github.com/plume-design/opensync-platform-cfg80211.git ${OPENSYNC_ROOT}/platform/cfg80211
-$ git clone --branch osync_5.6.0 https://github.com/plume-design/opensync-vendor-openwrt-template.git ${OPENSYNC_ROOT}/vendor/openwrt-template
-$ git clone --branch osync_5.6.0 https://github.com/plume-design/opensync-service-provider-local.git ${OPENSYNC_ROOT}/service-provider/local
+$ git clone --branch osync_6.4.0 https://github.com/plume-design/opensync.git ${OPENSYNC_ROOT}/core
+$ git clone --branch osync_6.4.0 https://github.com/plume-design/opensync-platform-cfg80211.git ${OPENSYNC_ROOT}/platform/cfg80211
+$ git clone --branch osync_6.4.0 https://github.com/plume-design/opensync-vendor-openwrt-template.git ${OPENSYNC_ROOT}/vendor/openwrt-template
+$ git clone --branch osync_6.4.0 https://github.com/plume-design/opensync-service-provider-local.git ${OPENSYNC_ROOT}/service-provider/local
 $ mkdir ${OPENSYNC_ROOT}/3rdparty
 ```
 
@@ -151,12 +175,12 @@ echo "src-git mtk_openwrt_feed https://git01.mediatek.com/openwrt/feeds/mtk-open
 src-git packages https://git.openwrt.org/feed/packages.git^f01f54e
 src-git luci https://git.openwrt.org/project/luci.git^d30ab74
 src-git routing https://git.openwrt.org/feed/routing.git^2c21c16
-src-git mtk_openwrt_feed https://git01.mediatek.com/openwrt/feeds/mtk-openwrt-feeds^aa392b3 
+src-git mtk_openwrt_feed https://git01.mediatek.com/openwrt/feeds/mtk-openwrt-feeds^aa392b3
 ```
 
 7. Copy OpenSync related overlays (package, dependencies, patches) to the `openwrt` directory
 
-8. Append OpenWrt `.config` for OpenSync 
+8. Append OpenWrt `.config` for OpenSync
 ```
 echo "CONFIG_PACKAGE_opensync=y" >> openwrt.config
 echo "CONFIG_OPENSYNC_TARGET=FILOGIC830-AX6000/FILOGIC830-AX8400" >> openwrt.config
@@ -181,7 +205,7 @@ make V=s
 Image install
 -------------
 
-Get your image in `openwrt/bin/targets/mediatek/mt7986` directory
+Get your image in the `openwrt/bin/targets/mediatek/mt7986` directory for FILOGIC-AX6000 and FILOGIC-AX8400:
 
 * FILOGIC-AX6000 with 2.5G WAN:
 
@@ -198,6 +222,12 @@ Get your image in `openwrt/bin/targets/mediatek/mt7986` directory
 * FILOGIC-AX8400 without 2.5G WAN:
 
 `openwrt-mediatek-mt7986-mt7986a-ax6000-spim-nand-rfb-squashfs-sysupgrade.bin`
+
+Get your image in the `bin/targets/mediatek/mt7988` directory for FILOGIC880-BE19000:
+
+* FILOGIC880-BE19000:
+
+`openwrt-mediatek-mt7988-mediatek_mt7988a-dsa-10g-spim-nand-squashfs-sysupgrade.bin`
 
 #### Full image reflash
 
@@ -264,10 +294,11 @@ $ /etc/init.d/opensync start|stop|restart
 Device access
 -------------
 
-The preferred way to access the device is through the serial console.
+The preferred way to access the reference device is through the serial console.
 
-SSH access is also available on all interfaces without password:
-* Username: `root`
+SSH access is also available on all interfaces:
+* Username: `osync`
+* Password: `osync123`
 
 
 OpenSync resources

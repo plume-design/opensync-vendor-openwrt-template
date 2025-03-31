@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# By default SeamlessCSA is set to 0 in MTK profile
+# Set it to 1 to enable CSA on 2.4G band
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b0.dat set SeamlessCSA 1
+
+# CSA for 5G/6G is set with option IEEE80211H and default value is 1 (enabled)
+
+exit 0

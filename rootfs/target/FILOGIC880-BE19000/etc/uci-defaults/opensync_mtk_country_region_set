@@ -1,0 +1,10 @@
+#!/bin/sh
+
+
+# In current MTK driver, there is another parameter named "country region" used to control enable/disable of channels.
+# The final valid channel list is the intersection of wireless_regdb(country code) and country region.
+# For US 5G band, current default region is 9, which valid channel list is 36-64,100-116,132-140,149-165,
+# this is why channel 120,124,128 are unavailable under US-FCC.
+# For this to be working, we need to set the country region to 26，which corresponds to channel list 36-64, 100-144, 149-177.
+
+datconf -f /etc/wireless/mediatek/mt7990.b1.dat set CountryRegionABand 26

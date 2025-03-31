@@ -50,3 +50,9 @@ fi
 
 # enable opensync
 service_enable opensync
+
+# enable debugnet service for management network
+service_enable debugnet
+
+# enable healthcheck service for checking system health
+service_enable healthcheck

@@ -1,38 +1,27 @@
-#!/bin/sh /etc/rc.common
+#!/bin/sh -e
 # {# jinja-parse #}
 INSTALL_PREFIX={{INSTALL_PREFIX}}
 
-START=50
+START=60
 
-SERVICE_PID_FILE="/var/run/udhcpc.pid"
-
-NAME=debugnet
-
-INTERFACES="eth1"
+PID_FILE_PREFIX=/var/run/udhcpc.pid
+INTERFACES="{{ CONFIG_MANAGER_WANO_IFACE_LIST }}"
 VLAN=4
-VLAN_DEFAULT_NAME="vlan${VLAN}"
+
+source "${INSTALL_PREFIX}/scripts/vlan.funcs.sh"
 
 start()
 {
     for IF in $INTERFACES
     do
-        # Skip non-existing interfaces
-        [ ! -e /sys/class/net/$IF ] && continue
+        test -e /sys/class/net/$IF || continue
+        VIF="$(vlan_ifname $IF $VLAN)"
+        vlan_add $IF $VLAN
 
-        VIF="${IF}.${VLAN}"
-        [ -d "/sys/class/net/$VIF" ] || vconfig add $IF $VLAN
-
-        # Bring-up interfaces
         ifconfig $IF up
         ifconfig $VIF up
-        start-stop-daemon -S -x /sbin/udhcpc -p $SERVICE_PID_FILE -b -m -- -s ${INSTALL_PREFIX}/bin/udhcpc.sh -f -S -i $VIF -C -o -O subnet
-
-        # If interface comes up with the default name "vlanx" then rename it to ethx.4
-        if [ ! -d "/sys/class/net/$VIF" ] && [ -d "/sys/class/net/$VLAN_DEFAULT_NAME" ]; then
-            ip link set dev $VLAN_DEFAULT_NAME down
-            ip link set dev $VLAN_DEFAULT_NAME name $VIF
-            ip link set dev $VIF up
-        fi
+        start-stop-daemon -K -x /sbin/udhcpc -p $PID_FILE_PREFIX.$VIF -t || \
+        start-stop-daemon -S -x /sbin/udhcpc -p $PID_FILE_PREFIX.$VIF -b -m -- -s ${INSTALL_PREFIX}/scripts/udhcpc.debugnet.sh -f -i $VIF -C -o -O subnet
     done
 }
 
@@ -40,11 +29,19 @@ stop()
 {
     for IF in $INTERFACES
     do
-        # Skip non-existing interfaces
-        [ ! -e /sys/class/net/$IF ] && continue
+        test -e /sys/class/net/$IF || continue
+        VIF="$(vlan_ifname $IF $VLAN)"
 
-        VIF="${IF}.${VLAN}"
-        start-stop-daemon -K -x /sbin/udhcpc -p $SERVICE_PID_FILE
-        [ -d "/sys/class/net/$VIF" ] && vconfig rem $VIF
+        ! start-stop-daemon -K -x /sbin/udhcpc -p $PID_FILE_PREFIX.$VIF -t || \
+        start-stop-daemon -K -x /sbin/udhcpc -p $PID_FILE_PREFIX.$VIF
+
+        vlan_del $IF $VLAN
     done
 }
+
+case "$1" in
+    boot) start ;;
+    start) start ;;
+    stop) stop ;;
+    *) exit 1 ;;
+esac

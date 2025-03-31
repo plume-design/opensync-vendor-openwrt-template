@@ -1,0 +1,4 @@
+#!/bin/sh
+
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b1.dat set DfsDedicatedZeroWait "0"
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b1.dat set DfsZeroWaitDefault "0"

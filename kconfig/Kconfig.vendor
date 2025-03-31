@@ -1,0 +1,4 @@
+config VENDOR_IS_OPENWRT_TEMPLATE
+    bool "OpenWRT template"
+    help
+        OpenSync template vendor layer for OpenWRT devices.

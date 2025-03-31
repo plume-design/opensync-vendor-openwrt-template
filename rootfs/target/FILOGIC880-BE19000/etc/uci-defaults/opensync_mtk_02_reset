@@ -1,0 +1,9 @@
+#!/bin/sh
+
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b0.dat set MldGroup "0"
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b1.dat set MldGroup "0"
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b2.dat set MldGroup "0"
+
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b0.dat set BssidNum "8"
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b1.dat set BssidNum "8"
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b2.dat set BssidNum "8"

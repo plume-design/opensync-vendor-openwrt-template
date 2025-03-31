@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Keep Apcli (AP-Client, aka STA iftype) MLO disabled for
+# now. The datapath handling for MLO vs non-MLO associations
+# is unclear. Once that is cleared up (and possibly fixed,
+# if it doesn't seem sane to work with) this can be
+# re-enabled.
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b0.dat set ApcliMloDisable 1
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b1.dat set ApcliMloDisable 1
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b2.dat set ApcliMloDisable 1
+
+# This enables MLO on the ra*3 and ra*6 interfaces
+# which are currently mapped for this device model
+# to be WPA3-capable Fronthauls.
+#
+# Other interfaces are not pulled into MLD groups, and are
+# kept as single-link MLOs, because:
+#  - backhauls: IPs subnet clash risk, needs research
+#  - aux: used for WPA2 compat
+#
+# Each group can be 1-16. 0 means "single-link MLD
+# autogroup". Do not use 17+. Typically each column below
+# should share a distinct number, or 0.
+#
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b0.dat set MldGroup "0;0;0;1;0;0;2;0"
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b1.dat set MldGroup "0;0;0;1;0;0;2;0"
+/usr/bin/datconf -f /etc/wireless/mediatek/mt7990.b2.dat set MldGroup "0;0;0;1;0;0;2;0"
+
+exit 0

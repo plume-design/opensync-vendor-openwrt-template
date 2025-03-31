@@ -35,18 +35,10 @@ start()
 
     ln -sf /var/run/ovsdb-server.pid $OVSDB_RUN_DIR/ovsdb-server.pid
     ln -sf /var/run/db.sock $OVSDB_RUN_DIR/db.sock
-
-    # ovs-vswitchd
-    service_start /usr/sbin/ovs-vswitchd --pidfile=/var/run/ovs-vswitchd.pid
-
-    ln -sf /var/run/ovs-vswitchd.pid $OVSDB_RUN_DIR/ovs-vswitchd.pid
 }
 
 stop()
 {
     # ovsdb-server
     service_stop /usr/sbin/ovsdb-server
-
-    # ovs-vswitchd
-    service_stop /usr/sbin/ovs-vswitchd
 }

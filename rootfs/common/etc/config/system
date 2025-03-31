@@ -1,0 +1,6 @@
+config system
+    option hostname opensync
+    option timezone UTC
+    option log_size 2048
+    option log_type 'file'
+    option log_file '/var/log/messages'
