@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Ignore ifup/ifdown actions, we only react when interface is created
+[ "$ACTION" = add ] || exit 0
+
+# We set RPS for
+# - STA/AP interfaces
+# - GRETAP interfaces
+# - SOFTWDS interfaces
+IP_DEBUG_OUTPUT=$(ip -d link show $INTERFACE)
+if { echo "$IP_DEBUG_OUTPUT" | grep -q -e "gretap" -e "softwds" -e "apcli" -e "ra"; }
+then
+    echo "Enabling RPS on interface $INTERFACE"
+else
+    exit 0
+fi
+
+# Performance tweak to spread load across multiple cores
+echo e | tee /sys/class/net/$INTERFACE/queues/rx*/rps_cpus
